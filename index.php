@@ -15,8 +15,9 @@ header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
 
 $uri = $_SERVER['REQUEST_URI'];
 $uri = str_replace('/kutuphane-case/', '', $uri);
-$uri = trim($uri, '/');
-$segments = explode('/', $uri);
+$path = parse_url($uri, PHP_URL_PATH);
+$path = trim($path, '/');
+$segments = explode('/', $path);
 $method = $_SERVER['REQUEST_METHOD'];
 
 # Connect to the database
@@ -30,14 +31,13 @@ $db = (new Database())->getConnection();
 $id = $segments[2] ?? null;
 $sub = $segments[3] ?? null;
 $resource = $segments[1] ?? null;
-
 switch ($resource) {
     case 'books':
         $controller = new BookController($db);
-        if ($id != '' && $method == 'GET') {
+        if ($id != 'search' && $id != ''  && $method == 'GET') {
             $controller->getById($id);
         } else {
-            AppHelpers::routeHandler($controller, $method, $id);
+            AppHelpers::routeHandler($controller, $method, $id, $_GET);
         }
         break;
 

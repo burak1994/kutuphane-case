@@ -20,7 +20,7 @@ class AppHelpers {
         echo json_encode($data);
         exit();
     }
-    public static function paginated($data, $pagination, $message = 'işlem başarılı', $status = 200): void {
+    public static function paginated($data, $pagination, $message = 'success', $status = 200): void {
         http_response_code($status);
         echo json_encode([
             'success' => true,
@@ -31,24 +31,30 @@ class AppHelpers {
         exit();
     }
 
-  public  static  function routeHandler($controller, $method, $id): void {
+    public static function routeHandler($controller, $method, $id,  $queryParams = []): void {
         switch ($method) {
             case 'GET':
-                $id ? $controller->search($id) : $controller->getAll();
+                 # if the path is 'search' and query parameter 'q' is provided search by query,  # if the path is empty get all data
+                $id == 'search' && !empty($queryParams['q']) ? $controller->searchByQuery($queryParams['q']): $controller->getAll();
                 break;
+
             case 'POST':
-                $controller->addNewBook();
+                $controller->addNewData();
                 break;
+    
             case 'PUT':
-                $id ? $controller->update($id) : self::json(['message' => 'ID required'], 400);
+                !empty($id) ?  $controller->updateData($id) :self::json(['success' => false, 'message' => 'ID required'], 400);
                 break;
+    
             case 'DELETE':
-                $id ? $controller->delete($id) : self::json(['message' => 'ID required'], 400);
+                (!empty($id)) ? $controller->deleteData($id) :self::json(['message' => 'ID required'], 400);
                 break;
+    
             default:
-            self::json(['message' => 'Method Not Allowed'], 405);
+                self::json(['message' => 'Method Not Allowed'], 405);
         }
     }
+    
 
     private static array $sqlErrorCodes = [
         1062 => 'Duplicate entry. ISBN must be unique.',
@@ -58,10 +64,21 @@ class AppHelpers {
         1049 => 'Unknown database.',
         1146 => 'Table doesn’t exist.',
         1054 => 'Unknown column.',
+        1264 => 'Data too long for column. ( check the length of the data *Page Count, ISBN, Title)',
      ];
 
      public static function getSqlErrorMessage(int $code): string
      {
          return self::$sqlErrorCodes[$code] ?? 'Unknown column.'.$code;
      }
+     public static function isValidId($id): array
+     {
+         $id = (string)$id;
+     
+         if (!ctype_digit($id) || (int)$id <= 0) {
+             return ['success' => false, 'message' => 'Invalid ID', 'id' => null];
+         }
+         return ['success' => true, 'id' => (int)$id];
+     }
+     
 }

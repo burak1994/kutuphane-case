@@ -1,23 +1,28 @@
 <?php
 require_once __DIR__ . '/../models/Book.php';
 require_once __DIR__ . '/../helpers/Helpers.php';
-class BookController
+require_once __DIR__ . '/../helpers/BookHelpers.php';
+require_once __DIR__ . '/../models/Base.php';
+
+class BookController extends Base
 {
     private Book $book;
 
     public function __construct(PDO $db)
     {
         $this->book = new Book($db);
+        parent::__construct($db, 'books');
     }
 
     public function getAll()
     {
-        $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
-        $perPage = isset($_GET['per_page']) ? (int) $_GET['per_page'] : 10;
-        $offset = ($page - 1) * $perPage;
+        $page    =  1;
+        $perPage =  10;
+        $offset  = ($page - 1) * $perPage;
 
-        $books = $this->book->getAll($perPage, $offset);
-        $total = $this->book->countAll();
+        $books   = $this->book->getAll($perPage, $offset);
+        # get the total count of books
+        $total   = parent::countAll();
 
         $pagination = [
             'current_page' => $page,
@@ -32,8 +37,15 @@ class BookController
 
     public function getById($id)
     {
-        $checkId = AppHelpers::cleanString($id);
-        $book = $this->book->getById($checkId);
+        # validate the ID
+        $validId = AppHelpers::isValidId($id);
+        if (!$validId['success']) {
+            http_response_code(400);
+            echo json_encode($validId);
+            return;
+        }
+
+         $book = $this->book->getById($validId['id']);
         if ($book) {
             echo json_encode(['success' => true, 'data' => $book]);
         } else {
@@ -42,51 +54,117 @@ class BookController
         }
     }
 
-    public function addNewBook()
+    public function addNewData()
     {
         $input = json_decode(file_get_contents("php://input"), true);
-    
-        # check if inputs are  valid
-        if (!isset($input['title'], $input['isbn'], $input['author_id'], $input['category_id'], $input['publication_year'], $input['page_count'])) {
+        # check if the input is valid JSON
+        if (is_null($input)) {
             http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'All fields are required']);
+            echo json_encode(['success' => false, 'message' => 'Invalid JSON format']);
             return;
         }
-    
-        # ISBN check 
-        if (!preg_match('/^\d{13}$/', $input['isbn'])) {
+        # filter the input data
+        $filteredData = BookHelpers::filterTheData($input);
+        if (!$filteredData['success']) {
             http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'ISBN must be 13 digits']);
+            echo json_encode(['success' => false, 'message' => $filteredData['message']]);
             return;
         }
-    
-        # Nuember fields check
-        if (
-            !is_numeric($input['author_id']) || 
-            !is_numeric($input['category_id']) || 
-            !is_numeric($input['publication_year']) || 
-            !is_numeric($input['page_count'])
-        ) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Author ID, Category ID, Publication Year and Page Count must be numeric']);
-            return;
-        }
-    
-        # publication year check
-        if (!preg_match('/^\d{4}$/', $input['publication_year'])) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Publication Year must be a 4-digit year']);
-            return;
-        }
-    
-        # inputs cleaning
+        # clean the input data
         $input = AppHelpers::cleanArray($input);
+        # add the new book
         $success = $this->book->addNewBook($input);
-    
+
         echo json_encode([
-            'success' => $success['success'],
-            'message' => $success['success'] ? 'Book Added' : $success['error']
+            'success' => $success['success'] ?? false,
+            'message' => $success['success'] ? 'Book Added' : ($success['error'] ?? 'An error occurred')
         ]);
     }
-    
+
+
+
+    public function updateData($id)
+    {
+        $input = json_decode(file_get_contents("php://input"), true);
+
+        # check if the input is valid JSON
+        if (is_null($input)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Invalid JSON format']);
+            return;
+        }
+        # validate the ID
+        $validId = AppHelpers::isValidId($id);
+        if (!$validId['success']) {
+            http_response_code(400);
+            echo json_encode($validId);
+            return;
+        }
+        # filter the input data
+        $filteredData = BookHelpers::filterTheData($input);
+        if (!$filteredData['success']) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => $filteredData['message']]);
+            return;
+        }
+        # clean the input data
+        $input = AppHelpers::cleanArray($input);
+
+        # add the new book
+        $success = $this->book->updateBook($validId['id'], $input);
+
+        echo json_encode([
+            'success' => $success['success'] ?? false,
+            'message' => $success['success'] ? 'Book Updated' : ($success['error'] ?? 'An error occurred')
+        ]);
+    }
+
+    public function deleteData($id)
+    {
+        # validate the ID
+        $validId = AppHelpers::isValidId($id);
+        if (!$validId['success']) {
+            http_response_code(400);
+            echo json_encode($validId);
+            return;
+        }
+
+        # remove the book
+        $result = $this->book->deleteBook($validId['id']);
+
+        echo json_encode([
+            'success' => $result['success'] ?? false,
+            'message' => $result['success'] ? 'Book Deleted' : ($result['error'] ?? 'An error occurred')
+        ]);
+    }
+
+    public function searchByQuery($query)
+    {
+        $query = AppHelpers::cleanString($query);
+
+        $page    =  1;
+        $perPage =  10;
+        $offset  = ($page - 1) * $perPage;
+
+        $books   = $this->book->searchBooks($query,$perPage, $offset);
+        # get the total count of books
+        $total   = parent::countAll('title =:query OR isbn =:query ', [':query' => $query]);
+
+        $pagination = [
+            'current_page' => $page,
+            'total_pages' => ceil($total / $perPage),
+            'per_page' => $perPage,
+            'total_items' => $total
+        ];
+        # return paginated data
+        AppHelpers::paginated($books, $pagination);
+
+
+        if ($books) {
+            echo json_encode(['success' => true, 'data' => $books]);
+        } else {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'message' => 'No books found']);
+        }
+    }
 }
