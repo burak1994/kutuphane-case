@@ -34,20 +34,12 @@ $resource = $segments[1] ?? null;
 switch ($resource) {
     case 'books':
         $controller = new BookController($db);
-        if ($id != 'search' && $id != ''  && $method == 'GET') {
-            $controller->getById($id);
-        } else {
-            AppHelpers::routeHandler($controller, $method, $id, $_GET);
-        }
+        ($id != 'search' && $id != ''  && $method == 'GET') ? $controller->getById($id) : AppHelpers::routeHandler($controller, $method, $id, $_GET);
         break;
 
     case 'authors':
         $controller = new AuthorController($db);
-        if ($sub === 'books' && $id) {
-            //$controller->booksByAuthor($id);
-        } else {
-            AppHelpers::routeHandler($controller, $method, $id);
-        }
+        ($id != '' && $sub == 'books'  && $method == 'GET') ? $controller->getAuthorsBooks($id) : (($id == '') ? AppHelpers::routeHandler($controller, $method, $id, $_GET) :AppHelpers::json(['success' => false,'message' => 'Invalid Request'], 404));
         break;
 
     case 'categories':

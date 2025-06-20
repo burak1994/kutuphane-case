@@ -37,7 +37,6 @@ class AppHelpers {
                  # if the path is 'search' and query parameter 'q' is provided search by query,  # if the path is empty get all data
                 $id == 'search' && !empty($queryParams['q']) ? $controller->searchByQuery($queryParams['q']): $controller->getAll();
                 break;
-
             case 'POST':
                 $controller->addNewData();
                 break;
@@ -56,21 +55,35 @@ class AppHelpers {
     }
     
 
-    private static array $sqlErrorCodes = [
-        1062 => 'Duplicate entry. ISBN must be unique.',
-        1451 => 'Foreign key constraint fails.',
-        1452 => 'Author  or category not found',
-        1048 => 'Column cannot be null.',
-        1049 => 'Unknown database.',
-        1146 => 'Table doesn’t exist.',
-        1054 => 'Unknown column.',
-        1264 => 'Data too long for column. ( check the length of the data *Page Count, ISBN, Title)',
-     ];
+    private static function setTheErrorMessage(int $code,string $message): string
+    {
+        switch ($code) {
+            case 1062:
+                return $message;
+            case 1451:
+                return 'Foreign key constraint fails.';
+            case 1452:
+                return 'Author or category not found.';
+            case 1048:
+                return 'Column cannot be null.';
+            case 1049:
+                return 'Unknown database.';
+            case 1146:
+                return 'Table does not exist.';
+            case 1054:
+                return 'Unknown column.';
+            case 1264:
+                return 'Data too long for column. (Check Page Count, ISBN, Title, etc.)';
+            default:
+                return 'Unknown SQL error.';
+        }
+    }
 
-     public static function getSqlErrorMessage(int $code): string
+     public static function getSqlErrorMessage(int $code,string $message =''): string
      {
-         return self::$sqlErrorCodes[$code] ?? 'Unknown column.'.$code;
+         return self::setTheErrorMessage($code,$message) ?? 'Unknown column.'.$code;
      }
+
      public static function isValidId($id): array
      {
          $id = (string)$id;

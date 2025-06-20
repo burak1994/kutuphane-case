@@ -19,8 +19,8 @@ class BookController extends Base
         $page    =  1;
         $perPage =  10;
         $offset  = ($page - 1) * $perPage;
-
-        $books   = $this->book->getAll($perPage, $offset);
+        # get all books with pagination from base model
+        $books   =  parent::getAllData($perPage, $offset);
         # get the total count of books
         $total   = parent::countAll();
 

@@ -8,14 +8,7 @@ class Book {
         $this->conn = $db;
     }
 
-    public function getAll($limit, $offset) {
-        $stmt = $this->conn->prepare("SELECT * FROM books LIMIT :limit OFFSET :offset");
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-    
+
     
     public function getById($id): ?array {
         $stmt = $this->conn->prepare("SELECT * FROM books WHERE id =:id");
