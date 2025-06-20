@@ -1,6 +1,10 @@
 <?php
+# helpers/Helpers.php
+require_once 'JWTHelpers.php';
+
 class AppHelpers {
-    // check the request method (array) 
+    
+     # Removes HTML tags and converts special characters to HTML entities
     public static function cleanArray(array $data): array {
         foreach ($data as $key => $val) {
             if (is_string($val)) {
@@ -10,17 +14,20 @@ class AppHelpers {
         return $data;
     }
 
-    // check the request method (string)
-    public static function cleanString(string $val): string {
+    # Clean single string value by sanitizing to prevent XSS attacks
+     public static function cleanString(string $val): string {
         return htmlspecialchars(strip_tags($val), ENT_QUOTES);
     }
 
+    # Send JSON response with specified HTTP status code and terminate script execution
     public static function json($data, $status = 200) {
         http_response_code($status);
         echo json_encode($data);
         exit();
     }
-    public static function paginated($data, $pagination, $message = 'success', $status = 200): void {
+
+    # Send paginated JSON response with data, pagination info and message
+     public static function paginated($data, $pagination, $message = 'success', $status = 200): void {
         http_response_code($status);
         echo json_encode([
             'success' => true,
@@ -31,10 +38,12 @@ class AppHelpers {
         exit();
     }
 
-    public static function routeHandler($controller, $method, $id,  $queryParams = []): void {
+    # Handle HTTP routing based on request method (GET, POST, PUT, DELETE)
+     public static function routeHandler($controller, $method, $id,  $queryParams = []): void {
+      
         switch ($method) {
             case 'GET':
-                 # if the path is 'search' and query parameter 'q' is provided search by query,  # if the path is empty get all data
+                 # If the path is 'search' and query parameter 'q' is provided search by query, if the path is empty get all data
                 $id == 'search' && !empty($queryParams['q']) ? $controller->searchByQuery($queryParams['q']): $controller->getAll();
                 break;
             case 'POST':
@@ -54,8 +63,8 @@ class AppHelpers {
         }
     }
     
-
-    private static function setTheErrorMessage(int $code,string $message): string
+    # Convert MySQL error codes to user-friendly error messages
+     private static function setTheErrorMessage(int $code,string $message): string
     {
         switch ($code) {
             case 1062:
@@ -79,19 +88,48 @@ class AppHelpers {
         }
     }
 
+    # Get user-readable error message from SQL error code
      public static function getSqlErrorMessage(int $code,string $message =''): string
-     {
-         return self::setTheErrorMessage($code,$message) ?? 'Unknown column.'.$code;
-     }
+    {
+        return self::setTheErrorMessage($code,$message) ?? 'Unknown column.'.$code;
+    }
 
+    # Validate if provided ID is a positive integer
      public static function isValidId($id): array
-     {
-         $id = (string)$id;
-     
-         if (!ctype_digit($id) || (int)$id <= 0) {
-             return ['success' => false, 'message' => 'Invalid ID', 'id' => null];
-         }
-         return ['success' => true, 'id' => (int)$id];
-     }
-     
+    {
+        $id = (string)$id;
+    
+        if (!ctype_digit($id) || (int)$id <= 0) {
+            return ['success' => false, 'message' => 'Invalid ID', 'id' => null];
+        }
+        return ['success' => true, 'id' => (int)$id];
+    }
+
+    # Validate JWT token from Authorization header
+    public static function checkJWT(): bool
+    {
+        $headers = getallheaders();
+        if (!isset($headers['Authorization'])) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Authorization header missing']);
+            exit;
+        }
+    
+        $jwt = explode(' ', $headers['Authorization'])[1] ?? '';
+        if (empty($jwt)) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Token missing']);
+            exit;
+        }
+    
+        $decoded = JwtHelper::validateToken($jwt);
+    
+        if (!$decoded) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Invalid or expired token']);
+            exit;
+        }
+    
+        return true;
+    }
 }

@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
 
 use Dotenv\Dotenv;
 use PDO;
@@ -23,7 +22,7 @@ class Database
  
         $dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
 
-        // PDO configs
+        # PDO configs
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION
         ];
@@ -31,8 +30,18 @@ class Database
         try {
             $this->pdo = new PDO($dsn, $user, $pass, $options);
         } catch (PDOException $e) {
-            die("Database connection error : " . $e->getMessage());
-        }
+            # Handle the error based on the environment
+            if ($_ENV['APP_ENV'] === 'development') {
+                die("Error : " . $e->getMessage());
+            } else {
+                error_log("DB Error: " . $e->getMessage());  
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Database connection failed. Please try again later.'
+                ]);
+                die();
+            }
+         }
     }
 
     // get the pdo conenction

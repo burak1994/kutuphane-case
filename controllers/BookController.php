@@ -13,7 +13,7 @@ class BookController extends Base
         $this->book = new Book($db);
         parent::__construct($db, 'books');
     }
-
+    # get all books with pagination
     public function getAll()
     {
         $page    =  1;
@@ -34,7 +34,7 @@ class BookController extends Base
         AppHelpers::paginated($books, $pagination);
     }
 
-
+    # get a book by ID
     public function getById($id)
     {
         # validate the ID
@@ -45,7 +45,7 @@ class BookController extends Base
             return;
         }
 
-         $book = $this->book->getById($validId['id']);
+        $book = $this->book->getById($validId['id']);
         if ($book) {
             echo json_encode(['success' => true, 'data' => $book]);
         } else {
@@ -53,7 +53,7 @@ class BookController extends Base
             echo json_encode(['success' => false, 'message' => 'Book not found']);
         }
     }
-
+    # add a new book
     public function addNewData()
     {
         $input = json_decode(file_get_contents("php://input"), true);
@@ -82,7 +82,7 @@ class BookController extends Base
     }
 
 
-
+    # update a book by ID
     public function updateData($id)
     {
         $input = json_decode(file_get_contents("php://input"), true);
@@ -119,6 +119,7 @@ class BookController extends Base
         ]);
     }
 
+    # delete a book by ID
     public function deleteData($id)
     {
         # validate the ID
@@ -138,6 +139,7 @@ class BookController extends Base
         ]);
     }
 
+    # search books by query ( title or ISBN )
     public function searchByQuery($query)
     {
         $query = AppHelpers::cleanString($query);
@@ -146,7 +148,7 @@ class BookController extends Base
         $perPage =  10;
         $offset  = ($page - 1) * $perPage;
 
-        $books   = $this->book->searchBooks($query,$perPage, $offset);
+        $books   = $this->book->searchBooks($query, $perPage, $offset);
         # get the total count of books
         $total   = parent::countAll('title =:query OR isbn =:query ', [':query' => $query]);
 

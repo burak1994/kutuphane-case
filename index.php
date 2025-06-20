@@ -1,36 +1,50 @@
 <?php
-// api/index.php
-
+#index.php
+require_once 'vendor/autoload.php';
 require_once 'config/Database.php';
 require_once 'helpers/Helpers.php';
 require_once 'controllers/BookController.php';
 require_once 'controllers/AuthorController.php';
+require_once 'controllers/LoginController.php';
 require_once 'controllers/CategoryController.php';
+require_once 'helpers/JWTHelpers.php';
 
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
 
-
+# Get the request URI and parse it
 $uri = $_SERVER['REQUEST_URI'];
 $uri = str_replace('/kutuphane-case/', '', $uri);
 $path = parse_url($uri, PHP_URL_PATH);
 $path = trim($path, '/');
 $segments = explode('/', $path);
 $method = $_SERVER['REQUEST_METHOD'];
+       
+
 
 # Connect to the database
-$db = (new Database())->getConnection(); 
+$db = (new Database())->getConnection();
 
- if ($segments[0] !== 'api') {
-    AppHelpers::json(['success' => false,'message' => 'Invalid endpoint'], 404);
+if ($segments[0] !== 'api') {
+    AppHelpers::json(['success' => false, 'message' => 'Invalid endpoint'], 404);
 }
-
-# Check the ID and sub parameters
+ # Check the ID and sub parameters
 $id = $segments[2] ?? null;
 $sub = $segments[3] ?? null;
 $resource = $segments[1] ?? null;
+
+# Define endpoint that do not require authentication
+$publicEndpoints = ['login'];
+
+# Check token if the resource is in the login endpoints
+if (!in_array($resource, $publicEndpoints) && $_ENV['APP_ENV'] == 'production') {
+    AppHelpers::checkJWT();
+}
+
+
+
 switch ($resource) {
     case 'books':
         $controller = new BookController($db);
@@ -39,17 +53,22 @@ switch ($resource) {
 
     case 'authors':
         $controller = new AuthorController($db);
-        ($id != '' && $sub == 'books'  && $method == 'GET') ? $controller->getAuthorsBooks($id) : (($id == '') ? AppHelpers::routeHandler($controller, $method, $id, $_GET) :AppHelpers::json(['success' => false,'message' => 'Invalid Request'], 404));
+        ($id != '' && $sub == 'books'  && $method == 'GET') ? $controller->getAuthorsBooks($id) : (($id == '') ? AppHelpers::routeHandler($controller, $method, $id, $_GET) : AppHelpers::json(['success' => false, 'message' => 'Invalid Request'], 404));
         break;
 
     case 'categories':
-       // $controller = new CategoryController($db);
-       AppHelpers::routeHandler($controller, $method, $id);
+        $controller = new CategoryController($db);
+        AppHelpers::routeHandler($controller, $method, $id);
+        break;
+    case 'login':
+        if ($method == 'POST') {
+            $controller = new LoginController();
+             $controller->login();
+        }  
         break;
 
     default:
-    AppHelpers::json(['success' => false,'message' => 'Resource not found'], 404);
+        AppHelpers::json(['success' => false, 'message' => 'Resource not found'], 404);
+        break;
 }
-
-
-?>
+ ?>

@@ -1,4 +1,5 @@
 <?php 
+# helpers/AuthorHelpers.php
 class AuthorHelpers
 {
 
