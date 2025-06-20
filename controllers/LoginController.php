@@ -1,7 +1,9 @@
 <?php
-require_once __DIR__ . '/../helpers/JWTHelpers.php';
-use Dotenv\Dotenv;
+namespace Controllers;
 
+ use Dotenv\Dotenv;
+ use Helpers;
+ 
 
 class LoginController
 {
@@ -18,7 +20,7 @@ class LoginController
     {
         $input = json_decode(file_get_contents("php://input"), true);
 
-        $filteredData = AppHelpers::cleanArray($input);
+        $filteredData = Helpers\AppHelpers::cleanArray($input);
 
         if ($filteredData['username'] == $_ENV['APP_ADMIN'] && $filteredData['password'] == $_ENV['APP_PASS']) {
             $payload = [
@@ -27,7 +29,7 @@ class LoginController
             ];
             echo json_encode([
                 'success' => true,
-                'token' => JwtHelper::createToken($payload)
+                'token' => Helpers\JwtHelpers::createToken($payload)
             ]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Invalid credentials']);

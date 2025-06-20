@@ -1,5 +1,7 @@
 <?php
 # helpers/BookHelpers.php 
+namespace Helpers;
+
 class BookHelpers
 {
 

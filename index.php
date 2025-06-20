@@ -2,12 +2,7 @@
 #index.php
 require_once 'vendor/autoload.php';
 require_once 'config/Database.php';
-require_once 'helpers/Helpers.php';
-require_once 'controllers/BookController.php';
-require_once 'controllers/AuthorController.php';
-require_once 'controllers/LoginController.php';
-require_once 'controllers/CategoryController.php';
-require_once 'helpers/JWTHelpers.php';
+use Helpers\AppHelpers;
 
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
@@ -47,28 +42,31 @@ if (!in_array($resource, $publicEndpoints) && $_ENV['APP_ENV'] == 'production') 
 
 switch ($resource) {
     case 'books':
-        $controller = new BookController($db);
-        ($id != 'search' && $id != ''  && $method == 'GET') ? $controller->getById($id) : AppHelpers::routeHandler($controller, $method, $id, $_GET);
+        $controller = new Controllers\BookController($db);
+        ($id != 'search' && $id != ''  && $method == 'GET') ? $controller->getById($id) : 
+        AppHelpers::routeHandler($controller, $method, $id, $_GET);
         break;
 
     case 'authors':
-        $controller = new AuthorController($db);
-        ($id != '' && $sub == 'books'  && $method == 'GET') ? $controller->getAuthorsBooks($id) : (($id == '') ? AppHelpers::routeHandler($controller, $method, $id, $_GET) : AppHelpers::json(['success' => false, 'message' => 'Invalid Request'], 404));
+        $controller = new Controllers\AuthorController($db);
+        ($id != '' && $sub == 'books'  && $method == 'GET') ? $controller->getAuthorsBooks($id) : (($id == '') ? 
+        AppHelpers::routeHandler($controller, $method, $id, $_GET) :
+        AppHelpers::json(['success' => false, 'message' => 'Invalid Request'], 404));
         break;
 
     case 'categories':
-        $controller = new CategoryController($db);
+        $controller = new Controllers\CategoryController($db);
         AppHelpers::routeHandler($controller, $method, $id);
         break;
     case 'login':
         if ($method == 'POST') {
-            $controller = new LoginController();
+            $controller = new Controllers\LoginController();
              $controller->login();
         }  
         break;
 
     default:
-        AppHelpers::json(['success' => false, 'message' => 'Resource not found'], 404);
+      AppHelpers::json(['success' => false, 'message' => 'Resource not found'], 404);
         break;
 }
  ?>

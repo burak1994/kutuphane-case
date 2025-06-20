@@ -1,11 +1,13 @@
 <?php
-# helpers/JWTHelpers.php
+# helpers/JwtHelper.php
+namespace Helpers;
+
  
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Dotenv\Dotenv;
 
-class JwtHelper
+class JwtHelpers
 {
     private static string $secretKey;
 
@@ -39,7 +41,7 @@ class JwtHelper
 
         try {
             return JWT::decode($token, new Key(self::$secretKey, 'HS256'));
-        } catch (Exception $e) {
+        } catch (\Firebase\JWT\ExpiredException $e) {
             return false;
         }
     }

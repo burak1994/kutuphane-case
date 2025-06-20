@@ -1,8 +1,10 @@
 <?php
-require_once __DIR__ . '/../models/Author.php';
-require_once __DIR__ . '/../helpers/Helpers.php';
-require_once __DIR__ . '/../helpers/AuthorHelpers.php';
-require_once __DIR__ . '/../models/Base.php';
+namespace Controllers;
+use Helpers;
+use PDO;
+use Models\Author;
+use Models\Base;
+
 class AuthorController extends Base{
     private Author $author;
 
@@ -27,7 +29,7 @@ class AuthorController extends Base{
             'total_items' => $total
         ];
         # return paginated data
-        AppHelpers::paginated($books, $pagination);
+        Helpers\AppHelpers::paginated($books, $pagination);
     }
 
     public function addNewData()
@@ -40,14 +42,14 @@ class AuthorController extends Base{
             return;
         }
         # filter the input data
-        $filteredData = AuthorHelpers::filterTheData($input);
+        $filteredData = Helpers\AuthorHelpers::filterTheData($input);
         if (!$filteredData['success']) {
             http_response_code(400);
             echo json_encode(['success' => false, 'message' => $filteredData['message']]);
             return;
         }
         # clean the input data
-        $input = AppHelpers::cleanArray($input);
+        $input = Helpers\AppHelpers::cleanArray($input);
         # add the new book
         $success = $this->author->addNewAuthor($input);
 
@@ -61,7 +63,7 @@ class AuthorController extends Base{
     {
 
         # validate the ID
-        $validId = AppHelpers::isValidId($id);
+        $validId = Helpers\AppHelpers::isValidId($id);
         if (!$validId['success']) {
             http_response_code(400);
             echo json_encode($validId);
@@ -84,7 +86,7 @@ class AuthorController extends Base{
             'total_items' => $total
         ];
         # return paginated data
-        AppHelpers::paginated($authors, $pagination);
+        Helpers\AppHelpers::paginated($authors, $pagination);
     }
 
 }

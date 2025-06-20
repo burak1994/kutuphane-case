@@ -1,6 +1,8 @@
 <?php
-require_once __DIR__ . '/../helpers/Helpers.php';
-
+ namespace Models;
+ use PDO;
+ use PDOException;
+use Helpers\AppHelpers;
 class Book {
     private PDO $conn;
 

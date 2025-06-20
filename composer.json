@@ -5,5 +5,17 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^11.5"
+    },
+  "autoload": {
+    "psr-4": {
+        "Helpers\\": "helpers/",
+        "Controllers\\": "controllers/",
+        "Models\\": "models/"
+    },
+    "autoload-dev": {
+    "psr-4": {
+        "Tests\\": "tests/"
     }
+}
+}
 }

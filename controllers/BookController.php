@@ -1,8 +1,11 @@
 <?php
-require_once __DIR__ . '/../models/Book.php';
-require_once __DIR__ . '/../helpers/Helpers.php';
-require_once __DIR__ . '/../helpers/BookHelpers.php';
-require_once __DIR__ . '/../models/Base.php';
+namespace Controllers;
+use PDO;
+use Models\Book;
+use Models\Base;
+use Helpers\AppHelpers;
+use Helpers\BookHelpers;
+
 
 class BookController extends Base
 {

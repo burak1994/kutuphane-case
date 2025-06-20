@@ -1,8 +1,11 @@
 <?php
-require_once __DIR__ . '/../models/Category.php';
- require_once __DIR__ . '/../helpers/Helpers.php';
-require_once __DIR__ . '/../helpers/CategoryHelpers.php';
-require_once __DIR__ . '/../models/Base.php';
+namespace Controllers;
+use PDO;
+use Models\Category;
+use Models\Base;
+use Helpers\AppHelpers;
+use Helpers\CategoryHelpers;
+
 class CategoryController extends Base{
     private Category $category;
 

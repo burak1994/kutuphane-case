@@ -1,4 +1,6 @@
 <?php
+namespace Models;
+use PDO;
 class Base {
     protected PDO $conn;
     protected string $table;

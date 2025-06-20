@@ -1,16 +1,18 @@
 <?php
 # helpers/CategoryHelpers.php
+namespace Helpers;
+
 class CategoryHelpers
 {
-    public static function filterTheData(array $input) : array{
+    public static function filterTheData(array $input): array {
         $response = ['success' => true];
-        # check if inputs are  valid
-        if (($input['name'] == '' ||  $input['description'] == '')) {
+        
+        if (!isset($input['name']) || !isset($input['description']) ||
+            empty(trim($input['name'])) || empty(trim($input['description']))) {
             $response = ['success' => false, 'message' => 'All fields are required'];
-            
         }
+        
         return $response;
-    
     }
     
 }

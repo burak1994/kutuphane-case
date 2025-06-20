@@ -1,4 +1,8 @@
 <?php
+namespace Models;
+use PDO;
+use PDOException;
+use Helpers\AppHelpers;
 class Author {
     private PDO $conn;
 

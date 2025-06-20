@@ -1,6 +1,7 @@
 <?php
 # helpers/Helpers.php
-require_once 'JWTHelpers.php';
+namespace Helpers;
+use Helpers\JwtHelpers;
 
 class AppHelpers {
     
@@ -122,7 +123,7 @@ class AppHelpers {
             exit;
         }
     
-        $decoded = JwtHelper::validateToken($jwt);
+        $decoded = JwtHelpers::validateToken($jwt);
     
         if (!$decoded) {
             http_response_code(401);
