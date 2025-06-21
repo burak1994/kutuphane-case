@@ -52,18 +52,15 @@ class AppHelpers
         switch ($method) {
             case 'GET':
                 # If the path is 'search' and query parameter 'q' is provided search by query, if the path is empty get all data
-                if($res = ($id == 'search' && !empty($queryParams['q'])))
-                    {
-                        $controller->searchByQuery($queryParams['q']);
-                    }
-                    else
-                    {
-                        $controller->getAll();
-                    }
+                if ($res = ($id == 'search' && !empty($queryParams['q']))) {
+                    
+                    $res = $controller->searchByQuery($queryParams['q']);
+                } else {
+                    $res = $controller->getAll();
+                }
                 break;
-
             case 'POST':
-                $res = $controller->addNewData();
+                    $res = $controller->addNewData();
                 break;
 
             case 'PUT':
@@ -141,36 +138,29 @@ class AppHelpers
     }
 
     # Validate JWT token from Authorization header
-    public static function checkJWT(): bool
+    public static function checkJWT(): array
     {
+        $res = [];
         $headers = getallheaders();
         if (!isset($headers['Authorization'])) {
-            http_response_code(401);
-            echo json_encode(['success' => false, 'message' => 'Authorization header missing']);
             LoggerHelpers::error('checkJWT@AppHelpers Authorization header missing');
-
-            exit;
+            $res =  ['status' => 401, 'body' => ['success' => false, 'message' => 'Authorization header missing']];
         }
 
         $jwt = explode(' ', $headers['Authorization'])[1] ?? '';
         if (empty($jwt)) {
-            http_response_code(401);
-            echo json_encode(['success' => false, 'message' => 'Token missing']);
-            LoggerHelpers::error('checkJWT@AppHelpers Token missing');
 
-            exit;
+            LoggerHelpers::error('checkJWT@AppHelpers Token missing');
+            $res =  ['status' => 401, 'body' => ['success' => false, 'message' => 'Token missing']];
         }
 
         $decoded = JwtHelpers::validateToken($jwt);
 
-        if (!$decoded) {
-            http_response_code(401);
-            echo json_encode(['success' => false, 'message' => 'Invalid or expired token']);
+        if (!$decoded['success']) {
+
             LoggerHelpers::error('checkJWT@AppHelpers Invalid or expired token');
-
-            exit;
+            $res =  ['status' => 401, 'body' => ['success' => false, 'message' => 'Invalid or expired token']];
         }
-
-        return true;
+        return $res;
     }
 }

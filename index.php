@@ -34,16 +34,21 @@ if ($segments[0] !== 'api') {
     AppHelpers::json(['success' => false, 'message' => 'Invalid endpoint'], 404);
 }
 # Check the ID and sub parameters
-$id = $segments[2] ?? null;
-$sub = $segments[3] ?? null;
+$id       = $segments[2] ?? null;
+$sub      = $segments[3] ?? null;
 $resource = $segments[1] ?? null;
 
 # Define endpoint that do not require authentication
 $publicEndpoints = ['login'];
 
-# Check token if the resource is in the login endpoints
+# Check token if the resource is in the login endpoints and the environment is production
 if (!in_array($resource, $publicEndpoints) && $_ENV['APP_ENV'] == 'production') {
-    AppHelpers::checkJWT();
+    $jwtCheck = AppHelpers::checkJWT();
+    if ($jwtCheck['status'] ?? null) {
+        http_response_code($jwtCheck['status']);
+        echo json_encode($jwtCheck['body']);
+        exit;
+    }
 }
 
 # Define the controller map
@@ -53,6 +58,7 @@ $controllerMap = [
     'categories' => CategoryController::class,
     'login' => LoginController::class,
 ];
+
 if (array_key_exists($resource, $controllerMap)) {
     $controller = new $controllerMap[$resource]($db);
     $res = null;
@@ -60,16 +66,18 @@ if (array_key_exists($resource, $controllerMap)) {
     switch ($resource) {
         case 'books':
             #  GET requests for books
+            # If the request is for a specific book by ID
             if ($id != 'search' && $id != ''  && $method == 'GET') {
                 $res = $controller->getById($id);
             } else {
+                # If the request is for all books or search via isbn or title
                 AppHelpers::routeHandler($controller, $method, $id, $_GET);
             }
             break;
         case 'authors':
             #  GET requests for authors
             if ($id != '' && $sub == 'books' && $method == 'GET') {
-                $controller->getAuthorsBooks($id);
+               $res = $controller->getAuthorsBooks($id);
             } elseif ($id == '') {
                 AppHelpers::routeHandler($controller, $method, $id, $_GET);
             } else {

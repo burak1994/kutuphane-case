@@ -6,6 +6,9 @@ use Helpers;
 use PDO;
 use Models\Author;
 use Models\Base;
+use Helpers\AppHelpers;
+use Helpers\AuthorHelpers;
+
 class AuthorController extends Base
 {
     private Author $author;
@@ -32,7 +35,7 @@ class AuthorController extends Base
             'total_items' => $total
         ];
         # return paginated data
-        return Helpers\AppHelpers::paginated($books, $pagination);
+        return AppHelpers::paginated($books, $pagination);
     }
 
     public function addNewData()
@@ -45,12 +48,12 @@ class AuthorController extends Base
             return ['status' => 400, 'body' => ['success' => false, 'message' => 'Invalid JSON format']];
         }
         # filter the input data
-        $filteredData = Helpers\AuthorHelpers::filterTheData($input);
+        $filteredData = AuthorHelpers::filterTheData($input);
         if (!$filteredData['success']) {
             return  ['status' => 400, 'body' => ['success' => false, 'message' => $filteredData['message']]];
         }
         # clean the input data
-        $input = Helpers\AppHelpers::cleanArray($input);
+        $input = AppHelpers::cleanArray($input);
         # add the new book
         $success = $this->author->addNewAuthor($input);
          
@@ -65,7 +68,7 @@ class AuthorController extends Base
     {
 
         # validate the ID
-        $validId = Helpers\AppHelpers::isValidId($id);
+        $validId = AppHelpers::isValidId($id);
         if (!$validId['success']) {
             return ['status' => 400, 'body' => $validId];
         }
@@ -86,6 +89,6 @@ class AuthorController extends Base
             'total_items' => $total
         ];
         # return paginated data
-        return Helpers\AppHelpers::paginated($authors, $pagination);
+        return AppHelpers::paginated($authors, $pagination);
     }
 }

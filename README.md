@@ -171,10 +171,12 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJ1c
 - **Gövde:**
   ```json
   {
-      "title": "Yeni Kitap",
-      "isbn": "9781234567890",
-      "author_id": 1,
-      "category_id": 1
+   "title": "Yeni Kitap",
+    "isbn": "9781234567890",
+    "author_id": 3,
+    "category_id": 3,
+    "publication_year" : 2022,
+    "page_count" :200
   }
   ```
 - **Validasyon Kuralları:**
@@ -417,7 +419,8 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxLCJ1c
 - **Gövde:**
   ```json
   {
-      "name": "Yeni Kategori"
+      "name": "Yeni Kategori",
+      "description" :"Kategori Açıklaması"
   }
   ```
 - **Validasyon Kuralları:**

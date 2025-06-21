@@ -36,15 +36,25 @@ class JwtHelpers
         return JWT::encode($payload, self::$secretKey, 'HS256');
     }
 
-    public static function validateToken(string $token)
+    public static function validateToken(string $token): array
     {
-        self::init();  
+        self::init();
 
         try {
-            return JWT::decode($token, new Key(self::$secretKey, 'HS256'));
+            $decoded = JWT::decode($token, new Key(self::$secretKey, 'HS256'));
+            return ['success' => true, 'payload' => $decoded];
         } catch (\Firebase\JWT\ExpiredException $e) {
-            LoggerHelpers::warning('validateToken@JwtHelpers Token expired: ' . $e->getMessage());
-            return false;
+            LoggerHelpers::error('validateToken@JwtHelpers Token expired: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Token expired'];
+        } catch (\Firebase\JWT\SignatureInvalidException $e) {
+            LoggerHelpers::error('validateToken@JwtHelpers Invalid signature: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Invalid token signature'];
+        } catch (\Firebase\JWT\BeforeValidException $e) {
+            LoggerHelpers::error('validateToken@JwtHelpers Token not yet valid: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Token not yet valid'];
+        } catch (\Exception $e) {
+            LoggerHelpers::error('validateToken@JwtHelpers Validation error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Invalid token'];
         }
     }
 }

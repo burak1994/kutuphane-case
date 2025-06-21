@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Anamakine: localhost
--- Üretim Zamanı: 19 Haz 2025, 10:42:00
+-- Üretim Zamanı: 22 Haz 2025, 00:48:27
 -- Sunucu sürümü: 10.4.28-MariaDB
 -- PHP Sürümü: 8.2.4
 
@@ -41,7 +41,8 @@ CREATE TABLE `authors` (
 INSERT INTO `authors` (`id`, `name`, `email`, `created_at`) VALUES
 (1, 'Nazım Hikmet', 'nhikmet@dogankitap.com', '2025-06-19 08:16:42'),
 (3, 'Orhan Pamuk', 'orhan@dogankitap.com', '2025-06-19 08:25:48'),
-(4, 'Sabahattin Ali', 'sabahattin@dogankitap.com', '2025-06-19 08:35:21');
+(4, 'Sabahattin Ali', 'sabahattin@dogankitap.com', '2025-06-19 08:35:21'),
+(12, 'Zülfü Livaneli', 'zlivaneli@dogankitap.com', '2025-06-20 12:57:21');
 
 -- --------------------------------------------------------
 
@@ -71,7 +72,8 @@ INSERT INTO `books` (`id`, `title`, `isbn`, `author_id`, `category_id`, `publica
 (5, 'Benim Adım Kırmızı', '978-975-08-2592-7', 3, 3, '2012', 452, 1, '2025-06-19 08:41:34'),
 (6, 'Masumiyet Müzesi', '978-975-08-2614-6', 3, 3, '2007', 387, 1, '2025-06-19 08:41:34'),
 (7, 'Değirmen', '978-975-08-0660-3', 4, 4, '1947', 240, 1, '2025-06-19 08:41:34'),
-(8, 'Yeni Dünya', '978-975-363-0661-1', 4, 4, '1953', 106, 1, '2025-06-19 08:41:34');
+(8, 'Yeni Dünya', '978-975-363-0661-1', 4, 4, '1953', 106, 1, '2025-06-19 08:41:34'),
+(19, 'Saatleri Ayarlama Enstitüsü', '1234567891011', 1, 2, '1975', 10, 1, '2025-06-19 22:02:28');
 
 -- --------------------------------------------------------
 
@@ -134,19 +136,19 @@ ALTER TABLE `categories`
 -- Tablo için AUTO_INCREMENT değeri `authors`
 --
 ALTER TABLE `authors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- Tablo için AUTO_INCREMENT değeri `books`
 --
 ALTER TABLE `books`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- Tablo için AUTO_INCREMENT değeri `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- Dökümü yapılmış tablolar için kısıtlamalar

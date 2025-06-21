@@ -30,7 +30,7 @@ class Book
             # Log the success message
             LoggerHelpers::info('getById@Book Model Fetched book with ID: ' . $id);
 
-            return $resp;
+            return ['status' => 200,'body' =>[$resp]];
         } catch (PDOException $th) {
             $errorInfo = $th->errorInfo;
             # Log the error message
@@ -86,8 +86,8 @@ class Book
             $errorInfo = $e->errorInfo;
             # Log the error message
             LoggerHelpers::error('addNewBook@Book Model Book adding failed: ' . $errorInfo[2]);
-
-            $driverErrorMessage = AppHelpers::getSqlErrorMessage($errorInfo[1]); // get the error message
+            # Get the driver error message
+            $driverErrorMessage = AppHelpers::getSqlErrorMessage($errorInfo[1],$errorInfo[2]);  
             return [
                 'success' => false,
                 'error' => $driverErrorMessage,
@@ -126,7 +126,7 @@ class Book
             return ['success' => $success];
         } catch (PDOException $e) {
             $errorInfo = $e->errorInfo;
-            $driverErrorMessage = AppHelpers::getSqlErrorMessage($errorInfo[1]);
+            $driverErrorMessage = AppHelpers::getSqlErrorMessage($errorInfo[1],$errorInfo[2]);  
             # Log the error message
             LoggerHelpers::error('updateBook@Book Model Book updating failed with ID: ' . $id . ' Error: ' . $errorInfo[2]);
             return [

@@ -54,7 +54,7 @@ class CategoryController extends Base{
         # add the new book
         $success = $this->category->addNewCategorie($input);
 
-        return ['status' => 400,'body' =>
+        return ['status' => $success['success'] ? 200 : 400,'body' =>
         ['success' => $success['success'] ?? false,
         'message' => $success['success'] ? 'Category Added' : ($success['error'] ?? 'An error occurred')
     ]];
