@@ -2,6 +2,10 @@
 #index.php
 use Helpers\AppHelpers;
 use Helpers\LoggerHelpers;
+use Controllers\BookController;
+use Controllers\AuthorController;
+use Controllers\CategoryController;
+use Controllers\LoginController;
 
 require_once 'vendor/autoload.php';
 require_once 'config/Database.php';
@@ -42,50 +46,55 @@ if (!in_array($resource, $publicEndpoints) && $_ENV['APP_ENV'] == 'production') 
     AppHelpers::checkJWT();
 }
 
+# Define the controller map
+$controllerMap = [
+    'books' => BookController::class,
+    'authors' => AuthorController::class,
+    'categories' => CategoryController::class,
+    'login' => LoginController::class,
+];
+if (array_key_exists($resource, $controllerMap)) {
+    $controller = new $controllerMap[$resource]($db);
+    $res = null;
 
-$res = null;
+    switch ($resource) {
+        case 'books':
+            #  GET requests for books
+            if ($id != 'search' && $id != ''  && $method == 'GET') {
+                $res = $controller->getById($id);
+            } else {
+                AppHelpers::routeHandler($controller, $method, $id, $_GET);
+            }
+            break;
+        case 'authors':
+            #  GET requests for authors
+            if ($id != '' && $sub == 'books' && $method == 'GET') {
+                $controller->getAuthorsBooks($id);
+            } elseif ($id == '') {
+                AppHelpers::routeHandler($controller, $method, $id, $_GET);
+            } else {
+                AppHelpers::json(['success' => false, 'message' => 'Invalid Request'], 404);
+            }
+            break;
 
-switch ($resource) {
-    case 'books':
-        $controller = new Controllers\BookController($db);
-        #  GET requests for books
-        if ($id != 'search' && $id != ''  && $method == 'GET') {
-           $res = $controller->getById($id);
-        } else {
-            AppHelpers::routeHandler($controller, $method, $id, $_GET);
-        }
-        break;
-    case 'authors':
-        $controller = new Controllers\AuthorController($db);
-        #  GET requests for authors
-        if ($id != '' && $sub == 'books' && $method == 'GET') {
-            $controller->getAuthorsBooks($id);
-        } elseif ($id == '') {
-            AppHelpers::routeHandler($controller, $method, $id, $_GET);
-        } else {
-            AppHelpers::json(['success' => false, 'message' => 'Invalid Request'], 404);
-        }
-        break;
+        case 'categories':
+            #  GET requests for categories
+            AppHelpers::routeHandler($controller, $method, $id);
+            break;
+        case 'login':
+            if ($method == 'POST') {
+                #  POST requests for login
+                $controller->login();
+            }
+            break;
 
-    case 'categories':
-        $controller = new Controllers\CategoryController($db);
-        #  GET requests for categories
-        AppHelpers::routeHandler($controller, $method, $id);
-        break;
-    case 'login':
-        if ($method == 'POST') {
-            $controller = new Controllers\LoginController();
-            #  POST requests for login
-            $controller->login();
-        }
-        break;
-
-    default:
-        LoggerHelpers::info('' . $resource . ' endpoint not found');
-        AppHelpers::json(['success' => false, 'message' => 'Resource not found'], 404);
-        break;
-}
-if ($res !== null) {
-    http_response_code($res['status']);
-    echo json_encode($res['body']);
+        default:
+            LoggerHelpers::info('' . $resource . ' endpoint not found');
+            AppHelpers::json(['success' => false, 'message' => 'Resource not found'], 404);
+            break;
+    }
+    if ($res !== null) {
+        http_response_code($res['status']);
+        echo json_encode($res['body']);
+    }
 }
