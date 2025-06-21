@@ -6,6 +6,7 @@ namespace Helpers;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Dotenv\Dotenv;
+use Helpers\LoggerHelpers;
 
 class JwtHelpers
 {
@@ -42,6 +43,7 @@ class JwtHelpers
         try {
             return JWT::decode($token, new Key(self::$secretKey, 'HS256'));
         } catch (\Firebase\JWT\ExpiredException $e) {
+            LoggerHelpers::warning('validateToken@JwtHelpers Token expired: ' . $e->getMessage());
             return false;
         }
     }

@@ -34,26 +34,24 @@ class BookController extends Base
             'total_items' => $total
         ];
         # return paginated data
-        AppHelpers::paginated($books, $pagination);
+        return AppHelpers::paginated($books, $pagination);
     }
 
     # get a book by ID
-    public function getById($id)
+    public function getById($id): array
     {
         # validate the ID
         $validId = AppHelpers::isValidId($id);
         if (!$validId['success']) {
-            http_response_code(400);
-            echo json_encode($validId);
-            return;
+            return ['status' => 400, 'body' => $validId];
+        
         }
 
         $book = $this->book->getById($validId['id']);
         if ($book) {
-            echo json_encode(['success' => true, 'data' => $book]);
+            return ['status' => 200,'body' =>['success' => true, 'data' => $book]];
         } else {
-            http_response_code(404);
-            echo json_encode(['success' => false, 'message' => 'Book not found']);
+            return ['status' => 200,'body' =>['success' => false, 'message' => 'Book not found']];
         }
     }
     # add a new book
@@ -62,26 +60,23 @@ class BookController extends Base
         $input = json_decode(file_get_contents("php://input"), true);
         # check if the input is valid JSON
         if (is_null($input)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Invalid JSON format']);
-            return;
+             return ['status' => 400,'body' =>['success' => false, 'message' => 'Invalid JSON format']];
         }
         # filter the input data
         $filteredData = BookHelpers::filterTheData($input);
         if (!$filteredData['success']) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => $filteredData['message']]);
-            return;
+            return  ['status' => 400,'body' =>['success' => false, 'message' => $filteredData['message']]];
+           
         }
         # clean the input data
         $input = AppHelpers::cleanArray($input);
         # add the new book
         $success = $this->book->addNewBook($input);
 
-        echo json_encode([
-            'success' => $success['success'] ?? false,
+        return ['status' => 400,'body' =>
+            ['success' => $success['success'] ?? false,
             'message' => $success['success'] ? 'Book Added' : ($success['error'] ?? 'An error occurred')
-        ]);
+        ]];
     }
 
 
@@ -92,23 +87,18 @@ class BookController extends Base
 
         # check if the input is valid JSON
         if (is_null($input)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Invalid JSON format']);
-            return;
+           return ['status' =>400,'body' =>['success' => false, 'message' => 'Invalid JSON format']];
         }
         # validate the ID
         $validId = AppHelpers::isValidId($id);
         if (!$validId['success']) {
-            http_response_code(400);
-            echo json_encode($validId);
-            return;
-        }
+             return ['status' => 400,'body' =>$validId];
+            }
         # filter the input data
         $filteredData = BookHelpers::filterTheData($input);
         if (!$filteredData['success']) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => $filteredData['message']]);
-            return;
+              return ['status' => 400, 'body' => ['success' => false, 'message' => $filteredData['message']]];
+
         }
         # clean the input data
         $input = AppHelpers::cleanArray($input);
@@ -116,10 +106,10 @@ class BookController extends Base
         # add the new book
         $success = $this->book->updateBook($validId['id'], $input);
 
-        echo json_encode([
+        return ['status'=>200,'body' =>[
             'success' => $success['success'] ?? false,
             'message' => $success['success'] ? 'Book Updated' : ($success['error'] ?? 'An error occurred')
-        ]);
+        ]];
     }
 
     # delete a book by ID
@@ -129,17 +119,16 @@ class BookController extends Base
         $validId = AppHelpers::isValidId($id);
         if (!$validId['success']) {
             http_response_code(400);
-            echo json_encode($validId);
-            return;
+            return ['status' => 400, 'body' => $validId];
         }
 
         # remove the book
         $result = $this->book->deleteBook($validId['id']);
 
-        echo json_encode([
+        return ['status' => 200, 'body' =>[
             'success' => $result['success'] ?? false,
             'message' => $result['success'] ? 'Book Deleted' : ($result['error'] ?? 'An error occurred')
-        ]);
+        ]];
     }
 
     # search books by query ( title or ISBN )
@@ -162,14 +151,13 @@ class BookController extends Base
             'total_items' => $total
         ];
         # return paginated data
-        AppHelpers::paginated($books, $pagination);
+        return AppHelpers::paginated($books, $pagination);
 
 
         if ($books) {
-            echo json_encode(['success' => true, 'data' => $books]);
+            return ['status' => 200, 'body' =>['success' => true, 'data' => $books]];
         } else {
-            http_response_code(404);
-            echo json_encode(['success' => false, 'message' => 'No books found']);
+             return ['status' => 404,'body' =>['success' => false, 'message' => 'No books found']];
         }
     }
 }

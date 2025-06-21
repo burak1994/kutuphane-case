@@ -2,6 +2,7 @@
 # helpers/Helpers.php
 namespace Helpers;
 use Helpers\JwtHelpers;
+use Helpers\LoggerHelpers;
 
 class AppHelpers {
     
@@ -28,41 +29,62 @@ class AppHelpers {
     }
 
     # Send paginated JSON response with data, pagination info and message
-     public static function paginated($data, $pagination, $message = 'success', $status = 200): void {
-        http_response_code($status);
-        echo json_encode([
+     public static function paginated($data, $pagination, $message = 'success', $status = 200): array {
+        return  ['status'=>$status,'body'=>[
             'success' => true,
             'data' => $data,
             'message' => $message,
             'pagination' => $pagination
-        ]);
-        exit();
-    }
+        ]];
+     }
 
     # Handle HTTP routing based on request method (GET, POST, PUT, DELETE)
-     public static function routeHandler($controller, $method, $id,  $queryParams = []): void {
-      
+    public static function routeHandler($controller, $method, $id, $queryParams = []): void {
+        $res = null;
+    
         switch ($method) {
             case 'GET':
-                 # If the path is 'search' and query parameter 'q' is provided search by query, if the path is empty get all data
-                $id == 'search' && !empty($queryParams['q']) ? $controller->searchByQuery($queryParams['q']): $controller->getAll();
+                # If the path is 'search' and query parameter 'q' is provided search by query, if the path is empty get all data
+                $res = ($id == 'search' && !empty($queryParams['q']))
+                    ? $controller->searchByQuery($queryParams['q'])
+                    : $controller->getAll();
                 break;
+    
             case 'POST':
-                $controller->addNewData();
+                $res = $controller->addNewData();
                 break;
     
             case 'PUT':
-                !empty($id) ?  $controller->updateData($id) :self::json(['success' => false, 'message' => 'ID required'], 400);
+                if (!empty($id)) {
+                    $res = $controller->updateData($id);
+                } else {
+                    $res = ['status' => 400, 'body' => ['success' => false, 'message' => 'ID required']];
+                    LoggerHelpers::warning('updateData@AppHelpers ID required for DELETE request');
+
+                }
                 break;
     
             case 'DELETE':
-                (!empty($id)) ? $controller->deleteData($id) :self::json(['message' => 'ID required'], 400);
+                if (!empty($id)) {
+                    $res = $controller->deleteData($id);
+                } else {
+                    $res = ['status' => 400, 'body' => ['message' => 'ID required']];
+                    LoggerHelpers::warning('deleteData@AppHelpers ID required for DELETE request');
+
+                }
                 break;
     
             default:
-                self::json(['message' => 'Method Not Allowed'], 405);
+                LoggerHelpers::warning('@AppHelpers Method not allowed: ' . $method);
+                $res = ['status' => 405, 'body' => ['message' => 'Method Not Allowed']];
+        }
+    
+        if ($res !== null) {
+            http_response_code($res['status']);
+            echo json_encode($res['body']);
         }
     }
+    
     
     # Convert MySQL error codes to user-friendly error messages
      private static function setTheErrorMessage(int $code,string $message): string
@@ -92,6 +114,7 @@ class AppHelpers {
     # Get user-readable error message from SQL error code
      public static function getSqlErrorMessage(int $code,string $message =''): string
     {
+        LoggerHelpers::error('getSqlErrorMessage@AppHelpers SQL Error Code: ' . $code . ' Message: ' . $message);
         return self::setTheErrorMessage($code,$message) ?? 'Unknown column.'.$code;
     }
 
@@ -101,6 +124,7 @@ class AppHelpers {
         $id = (string)$id;
     
         if (!ctype_digit($id) || (int)$id <= 0) {
+            LoggerHelpers::error('isValidId@AppHelpers Invalid ID: ' . $id);
             return ['success' => false, 'message' => 'Invalid ID', 'id' => null];
         }
         return ['success' => true, 'id' => (int)$id];
@@ -113,6 +137,8 @@ class AppHelpers {
         if (!isset($headers['Authorization'])) {
             http_response_code(401);
             echo json_encode(['success' => false, 'message' => 'Authorization header missing']);
+            LoggerHelpers::error('checkJWT@AppHelpers Authorization header missing');
+
             exit;
         }
     
@@ -120,6 +146,8 @@ class AppHelpers {
         if (empty($jwt)) {
             http_response_code(401);
             echo json_encode(['success' => false, 'message' => 'Token missing']);
+            LoggerHelpers::error('checkJWT@AppHelpers Token missing');
+
             exit;
         }
     
@@ -128,9 +156,13 @@ class AppHelpers {
         if (!$decoded) {
             http_response_code(401);
             echo json_encode(['success' => false, 'message' => 'Invalid or expired token']);
+            LoggerHelpers::error('checkJWT@AppHelpers Invalid or expired token');
+
             exit;
         }
     
         return true;
     }
+
+    
 }

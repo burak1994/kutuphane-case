@@ -1,8 +1,11 @@
 <?php
 #index.php
+use Helpers\AppHelpers;
+use Helpers\LoggerHelpers;
+
 require_once 'vendor/autoload.php';
 require_once 'config/Database.php';
-use Helpers\AppHelpers;
+
 
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
@@ -16,7 +19,8 @@ $path = parse_url($uri, PHP_URL_PATH);
 $path = trim($path, '/');
 $segments = explode('/', $path);
 $method = $_SERVER['REQUEST_METHOD'];
-       
+
+
 
 
 # Connect to the database
@@ -25,7 +29,7 @@ $db = (new Database())->getConnection();
 if ($segments[0] !== 'api') {
     AppHelpers::json(['success' => false, 'message' => 'Invalid endpoint'], 404);
 }
- # Check the ID and sub parameters
+# Check the ID and sub parameters
 $id = $segments[2] ?? null;
 $sub = $segments[3] ?? null;
 $resource = $segments[1] ?? null;
@@ -39,34 +43,49 @@ if (!in_array($resource, $publicEndpoints) && $_ENV['APP_ENV'] == 'production') 
 }
 
 
+$res = null;
 
 switch ($resource) {
     case 'books':
         $controller = new Controllers\BookController($db);
-        ($id != 'search' && $id != ''  && $method == 'GET') ? $controller->getById($id) : 
-        AppHelpers::routeHandler($controller, $method, $id, $_GET);
+        #  GET requests for books
+        if ($id != 'search' && $id != ''  && $method == 'GET') {
+           $res = $controller->getById($id);
+        } else {
+            AppHelpers::routeHandler($controller, $method, $id, $_GET);
+        }
         break;
-
     case 'authors':
         $controller = new Controllers\AuthorController($db);
-        ($id != '' && $sub == 'books'  && $method == 'GET') ? $controller->getAuthorsBooks($id) : (($id == '') ? 
-        AppHelpers::routeHandler($controller, $method, $id, $_GET) :
-        AppHelpers::json(['success' => false, 'message' => 'Invalid Request'], 404));
+        #  GET requests for authors
+        if ($id != '' && $sub == 'books' && $method == 'GET') {
+            $controller->getAuthorsBooks($id);
+        } elseif ($id == '') {
+            AppHelpers::routeHandler($controller, $method, $id, $_GET);
+        } else {
+            AppHelpers::json(['success' => false, 'message' => 'Invalid Request'], 404);
+        }
         break;
 
     case 'categories':
         $controller = new Controllers\CategoryController($db);
+        #  GET requests for categories
         AppHelpers::routeHandler($controller, $method, $id);
         break;
     case 'login':
         if ($method == 'POST') {
             $controller = new Controllers\LoginController();
-             $controller->login();
-        }  
+            #  POST requests for login
+            $controller->login();
+        }
         break;
 
     default:
-      AppHelpers::json(['success' => false, 'message' => 'Resource not found'], 404);
+        LoggerHelpers::info('' . $resource . ' endpoint not found');
+        AppHelpers::json(['success' => false, 'message' => 'Resource not found'], 404);
         break;
 }
- ?>
+if ($res !== null) {
+    http_response_code($res['status']);
+    echo json_encode($res['body']);
+}

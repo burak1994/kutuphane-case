@@ -1,6 +1,7 @@
 <?php
 # helpers/BookHelpers.php 
 namespace Helpers;
+use Helpers\LoggerHelpers;
 
 class BookHelpers
 {
@@ -10,12 +11,16 @@ class BookHelpers
         # check if inputs are  valid
         if (!isset($input['title'], $input['isbn'], $input['author_id'], $input['category_id'], $input['publication_year'], $input['page_count'])) {
             $response = ['success' => false, 'message' => 'All fields are required'];
+            LoggerHelpers::warning('filterTheData@BookHelpers All fields are required');
+
             
         }
     
         # ISBN check 
         if (!preg_match('/^\d{13}$/', $input['isbn'])) {
             $response = ['success' => false, 'message' => 'ISBN must be 13 digits'];
+            LoggerHelpers::warning('filterTheData@BookHelpers ISBN must be 13 digits');
+
             
         }
     
@@ -27,12 +32,16 @@ class BookHelpers
             !is_numeric($input['page_count'])
         ) {
             $response = ['success' => false, 'message' => 'Author ID, Category ID, Publication Year and Page Count must be numeric'];
+            LoggerHelpers::warning('Author ID, Category ID, Publication Year and Page Count must be numeric');
+
            
         }
     
         # publication year check
         if (!preg_match('/^\d{4}$/', $input['publication_year'])) {
             $response = ['success' => false, 'message' => 'Publication Year must be a 4-digit year'];
+            LoggerHelpers::warning('Publication Year must be a 4-digit year');
+
            
         }
         return $response;

@@ -1,23 +1,41 @@
 <?php
+
 namespace Models;
+
 use PDO;
-class Category {
+use PDOException;
+use Helpers\LoggerHelpers;
+
+class Category
+{
     private PDO $conn;
 
-    public function __construct(PDO $db) {
+    public function __construct(PDO $db)
+    {
         $this->conn = $db;
     }
     public function addNewCategorie($input)
     {
-        $stmt = $this->conn->prepare("INSERT INTO categories (name, description) VALUES (:name, :description)");
-        $stmt->bindParam(':name', $input['name']);
-        $stmt->bindParam(':description', $input['description']);
-        
-        if ($stmt->execute()) {
-            return ['success' => true];
-        } else {
-            return ['success' => false, 'error' => 'Failed to add category'];
+        try {
+
+            $stmt = $this->conn->prepare("INSERT INTO categories (name, description) VALUES (:name, :description)");
+            $stmt->bindParam(':name', $input['name']);
+            $stmt->bindParam(':description', $input['description']);
+
+            if ($stmt->execute()) {
+                # Log the success message
+                LoggerHelpers::info('addNewCategorie@Category Model Category added successfully');
+                return ['success' => true];
+            } else {
+                # Log the error message
+                LoggerHelpers::error('addNewCategorie@Category Model Failed to add category');
+                return ['success' => false, 'error' => 'Failed to add category'];
+            }
+        } catch (PDOException $th) {
+            $errorInfo = $th->errorInfo;
+            # Log the error message
+            LoggerHelpers::error('addNewCategorie@Category Model Category adding failed: ' . $errorInfo[2]);
+            return [];
         }
     }
- 
 }

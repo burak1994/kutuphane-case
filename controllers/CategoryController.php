@@ -33,7 +33,7 @@ class CategoryController extends Base{
             'total_items' => $total
         ];
         # return paginated data
-        AppHelpers::paginated($books, $pagination);
+        return AppHelpers::paginated($books, $pagination);
     }
 
     public function addNewData()
@@ -41,26 +41,23 @@ class CategoryController extends Base{
         $input = json_decode(file_get_contents("php://input"), true);
         # check if the input is valid JSON
         if (is_null($input)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Invalid JSON format']);
-            return;
-        }
+            return ['status' => 400,'body' =>['success' => false, 'message' => 'Invalid JSON format']];
+         }
         # filter the input data
         $filteredData = CategoryHelpers::filterTheData($input);
         if (!$filteredData['success']) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => $filteredData['message']]);
-            return;
+             return  ['status' => 400,'body' =>['success' => false, 'message' => $filteredData['message']]];
+            
         }
         # clean the input data
         $input = AppHelpers::cleanArray($input);
         # add the new book
         $success = $this->category->addNewCategorie($input);
 
-        echo json_encode([
-            'success' => $success['success'] ?? false,
-            'message' => $success['success'] ? 'Category Added' : ($success['error'] ?? 'An error occurred')
-        ]);
+        return ['status' => 400,'body' =>
+        ['success' => $success['success'] ?? false,
+        'message' => $success['success'] ? 'Category Added' : ($success['error'] ?? 'An error occurred')
+    ]];
     }
 
  

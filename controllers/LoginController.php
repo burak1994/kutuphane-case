@@ -3,7 +3,7 @@ namespace Controllers;
 
  use Dotenv\Dotenv;
  use Helpers;
- 
+ use Helpers\LoggerHelpers;
 
 class LoginController
 {
@@ -32,6 +32,8 @@ class LoginController
                 'token' => Helpers\JwtHelpers::createToken($payload)
             ]);
         } else {
+            LoggerHelpers::warning('login@LoginController Invalid credentials for user: ' . $filteredData['username']);
+
             echo json_encode(['success' => false, 'message' => 'Invalid credentials']);
         }
     }

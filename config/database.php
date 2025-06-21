@@ -3,6 +3,7 @@
 use Dotenv\Dotenv;
 use PDO;
 use PDOException;
+use Helpers\LoggerHelpers;
 
 class Database
 {
@@ -34,7 +35,8 @@ class Database
             if ($_ENV['APP_ENV'] === 'development') {
                 die("Error : " . $e->getMessage());
             } else {
-                error_log("DB Error: " . $e->getMessage());  
+                LoggerHelpers::error('database@connection_error: ' . $e->getMessage());
+
                 echo json_encode([
                     'success' => false,
                     'message' => 'Database connection failed. Please try again later.'
