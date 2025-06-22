@@ -33,8 +33,11 @@ class Database
         } catch (PDOException $e) {
             # Handle the error based on the environment
             if ($_ENV['APP_ENV'] === 'development') {
-                die("Error : " . $e->getMessage());
-            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ]);
+             } else {
                 LoggerHelpers::error('database@connection_error: ' . $e->getMessage());
 
                 echo json_encode([

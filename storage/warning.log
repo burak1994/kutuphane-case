@@ -1,0 +1,4 @@
+[2025-06-22 11:11:15] updateData@AppHelpers ID required for DELETE request
+[2025-06-22 11:13:06] filterTheData@BookHelpers All fields are required
+[2025-06-22 11:13:06] Author ID, Category ID, Publication Year and Page Count must be numeric
+[2025-06-22 11:13:06] Publication Year must be a 4-digit year

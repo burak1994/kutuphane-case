@@ -30,7 +30,7 @@ class Book
             # Log the success message
             LoggerHelpers::info('getById@Book Model Fetched book with ID: ' . $id);
 
-            return ['status' => 200,'body' =>[$resp]];
+            return $resp;
         } catch (PDOException $th) {
             $errorInfo = $th->errorInfo;
             # Log the error message

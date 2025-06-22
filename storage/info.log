@@ -1,0 +1,34 @@
+[2025-06-22 10:55:18] getAllData@Base Model Fetched all records from books
+[2025-06-22 10:55:18] countAll@Base Model Counted all records in books
+[2025-06-22 10:56:13] getById@Book Model Fetched book with ID: 3
+[2025-06-22 10:59:20] getById@Book Model Fetched book with ID: 3
+[2025-06-22 10:59:54] getById@Book Model Fetched book with ID: 3
+[2025-06-22 11:00:28] getById@Book Model Fetched book with ID: 3
+[2025-06-22 11:00:45] getById@Book Model Fetched book with ID: 3
+[2025-06-22 11:00:52] getById@Book Model Fetched book with ID: 3
+[2025-06-22 11:03:14] getById@Book Model Fetched book with ID: 3
+[2025-06-22 11:03:28] getById@Book Model Fetched book with ID: 3
+[2025-06-22 11:04:07] getById@Book Model Fetched book with ID: 3
+[2025-06-22 11:04:44] getAllData@Base Model Fetched all records from books
+[2025-06-22 11:04:44] countAll@Base Model Counted all records in books
+[2025-06-22 11:05:33] getById@Book Model Fetched book with ID: 1
+[2025-06-22 11:05:36] getById@Book Model Fetched book with ID: 3
+[2025-06-22 11:07:39] getById@Book Model Fetched book with ID: 3
+[2025-06-22 11:08:04] searchBooks@Book Model Fetched books with query: 4
+[2025-06-22 11:08:04] countAll@Base Model Counted all records in books
+[2025-06-22 11:08:59] getAllData@Base Model Fetched all records from books
+[2025-06-22 11:08:59] countAll@Base Model Counted all records in books
+[2025-06-22 11:09:49] getById@Book Model Fetched book with ID: 3
+[2025-06-22 11:11:25] addNewBook@Book Model Book added successfully
+[2025-06-22 11:14:09] addNewBook@Book Model Book added successfully
+[2025-06-22 11:14:21] updateBook@Book Model Book updated successfully with ID: 4
+[2025-06-22 11:16:06] searchBooks@Book Model Fetched books with query: 9781234567890
+[2025-06-22 11:16:06] countAll@Base Model Counted all records in books
+[2025-06-22 11:17:16] getAllData@Base Model Fetched all records from authors
+[2025-06-22 11:17:16] countAll@Base Model Counted all records in authors
+[2025-06-22 11:18:01] addNewAuthor@Author Model Author added successfully
+[2025-06-22 13:16:28] getAuthorsBooks@Author Model Books fetched successfully for author id: 4
+[2025-06-22 13:16:28] countAuthorsBooks@Author Model Count of books fetched successfully for author id: 4
+[2025-06-22 13:18:30] getAllData@Base Model Fetched all records from categories
+[2025-06-22 13:18:30] countAll@Base Model Counted all records in categories
+[2025-06-22 13:20:27] addNewCategorie@Category Model Category added successfully

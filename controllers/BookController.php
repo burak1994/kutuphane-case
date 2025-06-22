@@ -49,7 +49,7 @@ class BookController extends Base
 
         $book = $this->book->getById($validId['id']);
         if ($book) {
-            return ['status' => 200,'body' =>['success' => true, 'data' => $book]];
+            return ['status' => 200,'body' =>['success' => true, 'data' => $book,'message' => 'book fetched successfully']];
         } else {
             return ['status' => 200,'body' =>['success' => false, 'message' => 'Book not found']];
         }
